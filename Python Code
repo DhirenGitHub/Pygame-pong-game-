@@ -1,0 +1,121 @@
+import pygame
+import sys
+
+WIDTH = 700
+HEIGHT = 450
+FPS = 60
+
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+clock = pygame.time.Clock()
+
+
+class Player1(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 75))
+        self.image.fill((250, 250, 250))
+        self.rect = self.image.get_rect()
+        self.rect.y = HEIGHT / 2 - 50
+        self.rect.x = self.rect.width * 2
+        self.vel = 4
+
+    def update(self):
+        key = pygame.key.get_pressed()
+
+        if key[pygame.K_w]:
+            self.rect.y -= self.vel
+        if key[pygame.K_s]:
+            self.rect.y += self.vel
+
+        if self.rect.y <= 0:
+            self.rect.y += self.vel
+
+        if self.rect.y >= HEIGHT - self.rect.height:
+            self.rect.y -= self.vel
+
+
+class Player2(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 75))
+        self.image.fill((250, 250, 250))
+        self.rect = self.image.get_rect()
+        self.rect.y = HEIGHT / 2 - 50
+        self.rect.x = WIDTH - self.rect.width * 2
+        self.vel = 4
+
+    def update(self):
+        key = pygame.key.get_pressed()
+
+        if key[pygame.K_UP]:
+            self.rect.y -= self.vel
+        if key[pygame.K_DOWN]:
+            self.rect.y += self.vel
+
+        if self.rect.y <= 0:
+            self.rect.y += self.vel
+
+        if self.rect.y >= HEIGHT - self.rect.height:
+            self.rect.y -= self.vel
+
+
+class Ball(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 10))
+        self.image.fill((250, 250, 250))
+        self.rect = self.image.get_rect()
+        self.rect.y = HEIGHT / 2
+        self.rect.x = WIDTH / 2
+        self.vely = 3
+        self.velx = 3
+
+    def update(self):
+
+        hit1 = pygame.sprite.spritecollide(player1, ball_group, False)
+        hit2 = pygame.sprite.spritecollide(player2, ball_group, False)
+
+        if hit1 or hit2:
+            self.velx = -self.velx
+
+        self.rect.x += self.velx
+        self.rect.y += self.vely
+
+        if self.rect.x >= WIDTH - self.rect.width:
+            self.velx = -self.velx
+        if self.rect.x <= 0:
+            self.velx = -self.velx
+        if self.rect.y >= HEIGHT - self.rect.height:
+            self.vely = -self.vely
+        if self.rect.y <= 0:
+            self.vely = -self.vely
+
+
+all_sprites = pygame.sprite.Group()
+player1 = Player1()
+player2 = Player2()
+ball = Ball()
+
+ball_group = pygame.sprite.Group()
+ball_group.add(ball)
+
+all_sprites.add(ball)
+all_sprites.add(player1)
+all_sprites.add(player2)
+
+run = True
+while run:
+    clock.tick(FPS)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    screen.fill((10, 10, 10))
+    all_sprites.draw(screen)
+    all_sprites.update()
+    pygame.display.update()
+    pygame.display.flip()
